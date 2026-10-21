@@ -1,0 +1,193 @@
+@import 'tailwindcss';
+
+/* Dark mode is class-based (html.dark) so the user can override the OS preference. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens (shadcn/ui naming). Text/background pairs are chosen for WCAG AA contrast;
+ * income/expense colours are never the only signal – amounts always carry a +/− sign.
+ */
+:root {
+  color-scheme: light;
+  --background: #f6f6f3;
+  --foreground: #0b0b0b;
+  --card: #ffffff;
+  --card-foreground: #0b0b0b;
+  --muted: #efeeea;
+  --muted-foreground: #5f5e59;
+  --accent: #efeeea;
+  --accent-foreground: #0b0b0b;
+  --border: #e3e2dc;
+  --input: #d3d2cb;
+  --ring: #6250d6;
+  --primary: #6250d6;
+  --primary-foreground: #ffffff;
+  --secondary: #efeeea;
+  --secondary-foreground: #0b0b0b;
+  --destructive: #c42b2b;
+  --destructive-foreground: #ffffff;
+  --income: #08700a;
+  --expense: #c42b2b;
+  --warning: #9a5b00;
+  --success: #08700a;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #0d0d0d;
+  --foreground: #f0efec;
+  --card: #1a1a19;
+  --card-foreground: #f0efec;
+  --muted: #242422;
+  --muted-foreground: #a8a79f;
+  --accent: #2a2a28;
+  --accent-foreground: #f0efec;
+  --border: #2c2c2a;
+  --input: #3a3a37;
+  --ring: #9085e9;
+  --primary: #9085e9;
+  --primary-foreground: #0d0d0d;
+  --secondary: #262624;
+  --secondary-foreground: #f0efec;
+  --destructive: #c93a3a;
+  --destructive-foreground: #ffffff;
+  --income: #3dbb45;
+  --expense: #f06b6b;
+  --warning: #f0b232;
+  --success: #3dbb45;
+}
+
+@theme inline {
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-income: var(--income);
+  --color-expense: var(--expense);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+
+  --animate-sheet-in: sheet-in 220ms cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-dialog-in: dialog-in 160ms ease-out;
+  --animate-toast-in: toast-in 200ms ease-out;
+  --animate-fade-in: fade-in 150ms ease-out;
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Native <dialog> backdrop for the sheet/modal component. */
+  dialog::backdrop {
+    background: rgb(0 0 0 / 0.6);
+  }
+
+  input[type='datetime-local']::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+  }
+
+  .dark input[type='datetime-local']::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 1ms !important;
+      transition-duration: 1ms !important;
+    }
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hide scrollbars on horizontally scrolling chip rows while keeping them scrollable. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

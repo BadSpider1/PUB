@@ -1,0 +1,51 @@
+{
+  "name": "personal-finance-vault",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "lint": "oxlint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "generate-pwa-assets": "pwa-assets-generator"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "dexie": "^4.4.6",
+    "lucide-react": "^1.61.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-is": "^19.3.1",
+    "react-router": "^8.5.0",
+    "recharts": "^3.10.1",
+    "tailwind-merge": "^3.7.0",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/gapi": "^0.0.47",
+    "@types/google.accounts": "^0.0.18",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vite-pwa/assets-generator": "^2.0.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "fake-indexeddb": "^6.2.6",
+    "oxlint": "^1.88.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.3",
+    "vite": "^8.3.4",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.0.5",
+    "workbox-window": "^7.4.1"
+  },
+  "description": "Offline-first personal finance PWA with an Obsidian-like vault file (IndexedDB + File System Access + Google Drive).",
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

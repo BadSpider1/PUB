@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Personal Finance Vault</title>
+    <meta name="description" content="Offline-first personal finance tracker with an Obsidian-like vault file you control." />
+    <meta name="theme-color" content="#0d0d0d" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Finance Vault" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+    <script>
+      // Apply the saved theme before first paint to avoid a light/dark flash.
+      // Must stay in sync with useSettingsStore (persist key "pfv-settings").
+      ;(function () {
+        try {
+          var raw = localStorage.getItem('pfv-settings')
+          var theme = (raw && JSON.parse(raw).state.theme) || 'dark'
+          var dark =
+            theme === 'dark' ||
+            (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          document.documentElement.classList.toggle('dark', dark)
+        } catch (e) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
