@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Personal Finance Vault – finance_vault.json",
+  "description": "Canonical form written by the app (schemaVersion 1). The app's reader is more lenient; see docs/API.md. Keep in sync with src/sync/vaultFormat.ts.",
+  "type": "object",
+  "required": ["app", "schemaVersion", "exportedAt", "data"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional, for editor validation. Ignored by the app and dropped when it rewrites the file."
+    },
+    "app": { "const": "personal-finance-vault" },
+    "schemaVersion": { "const": 1 },
+    "exportedAt": { "$ref": "#/$defs/timestamp", "description": "When the file was written. Informational only." },
+    "data": {
+      "type": "object",
+      "required": ["categories", "transactions", "tombstones"],
+      "additionalProperties": false,
+      "properties": {
+        "categories": { "type": "array", "items": { "$ref": "#/$defs/category" } },
+        "transactions": { "type": "array", "items": { "$ref": "#/$defs/transaction" } },
+        "tombstones": { "type": "array", "items": { "$ref": "#/$defs/tombstone" } }
+      }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "minLength": 1 },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC as produced by Date#toISOString(), e.g. 2026-10-21T09:13:05.120Z.",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    },
+    "transactionType": { "enum": ["expense", "income"] },
+    "category": {
+      "type": "object",
+      "required": ["id", "name", "type", "color", "icon", "createdAt", "updatedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id", "description": "Unique among categories. Default categories use fixed ids (seed-…)." },
+        "name": { "type": "string", "minLength": 1 },
+        "type": { "$ref": "#/$defs/transactionType" },
+        "color": { "type": "string", "pattern": "^#[0-9a-f]{6}$" },
+        "icon": { "type": "string", "description": "Key of CATEGORY_ICONS (Lucide component name). Unknown names render a tag icon." },
+        "createdAt": { "$ref": "#/$defs/timestamp" },
+        "updatedAt": { "$ref": "#/$defs/timestamp", "description": "Last change; the newer version wins when merging." }
+      }
+    },
+    "transaction": {
+      "type": "object",
+      "required": ["id", "amount", "type", "categoryId", "date", "note", "createdAt", "updatedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id", "description": "Unique among transactions (UUID v4 when created by the app)." },
+        "amount": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Positive amount in major currency units, rounded to 2 decimals. The sign comes from type."
+        },
+        "type": { "$ref": "#/$defs/transactionType" },
+        "categoryId": { "$ref": "#/$defs/id" },
+        "date": { "$ref": "#/$defs/timestamp", "description": "When the transaction happened." },
+        "note": { "type": "string" },
+        "createdAt": { "$ref": "#/$defs/timestamp" },
+        "updatedAt": { "$ref": "#/$defs/timestamp", "description": "Last change; the newer version wins when merging." }
+      }
+    },
+    "tombstone": {
+      "type": "object",
+      "required": ["id", "entity", "deletedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "entity": { "enum": ["category", "transaction"] },
+        "deletedAt": { "$ref": "#/$defs/timestamp" }
+      }
+    }
+  }
+}

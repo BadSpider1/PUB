@@ -53,6 +53,16 @@ npm run dev                  # http://localhost:5173
 | `npm test` | Unit tests (Vitest), covering merge, vault format, repository and the Drive adapter |
 | `npm run generate-pwa-assets` | Regenerate the PNG/ICO icons in `public/` from `public/logo.svg` |
 
+## Documentation
+
+| Document | Contents |
+| --- | --- |
+| [docs/SETUP.md](docs/SETUP.md) | Development setup, configuration, Google Cloud setup, testing on phones, deployment (GitHub Pages, Netlify, Vercel…), multi-device sync setup |
+| [docs/API.md](docs/API.md) | `finance_vault.json` format and safe external edits, URL/deep-link interface, internal module APIs, Google Drive endpoints |
+| [docs/finance_vault.schema.json](docs/finance_vault.schema.json) | JSON Schema for the vault file |
+| [docs/MAINTENANCE.md](docs/MAINTENANCE.md) | Invariants, dependency upgrades, releases and updates, data-model migrations, troubleshooting, data recovery, QA checklist |
+| [CHANGELOG.md](CHANGELOG.md) | Release history |
+
 ## Storage architecture
 
 ```mermaid
@@ -144,48 +154,24 @@ Pretty-printed and meant to be readable and hand-editable: categories grouped by
 }
 ```
 
-- `amount` is always positive; the sign comes from `type`. Dates are ISO-8601 (UTC).
-- `icon` is a key of `CATEGORY_ICONS` in `src/lib/icons.ts`; unknown names fall back to a tag icon.
-- Hand edits are welcome: missing timestamps, numeric strings and negative amounts are accepted and normalized.
-  Bump `updatedAt` (or remove it on new records) so your edit wins over older copies. The parser reports the exact
-  path of anything invalid, e.g. `transactions[3].type must be "expense" or "income"`.
-- TypeScript definitions: `src/types/finance.ts` and `src/types/vault.ts`.
+`amount` is always positive (the sign comes from `type`), and dates are ISO-8601 UTC. The file is meant to be
+hand-editable. The field reference, the parser's leniency rules, how to edit the file safely from scripts, and a
+JSON Schema are in [docs/API.md](docs/API.md#vault-file-format).
 
 ## Google Drive setup
 
-Without a client id the Drive card says *Not configured* and offers **Try simulated Drive**: a stand-in that
-keeps the vault in `localStorage` so you can try the whole sync flow. It is not a backup.
+Without configuration, the Drive card says *Not configured* and offers **Try simulated Drive**: a stand-in that keeps
+the vault in `localStorage` so you can try the whole sync flow. It is not a backup.
 
-To enable real Google Drive sync (free, about 5 minutes):
+For real Drive sync, create a free OAuth *Web application* client in Google Cloud with the `drive.file` scope (the app
+then sees only files it created). Add your origins, and put the client id in `.env.local`:
 
-1. Open the [Google Cloud Console](https://console.cloud.google.com/) and create or select a project.
-2. **APIs & Services → Library**: enable **Google Drive API**.
-3. **APIs & Services → OAuth consent screen** (Google Auth Platform):
-   - User type **External**; fill in the app name and support email.
-   - **Data access / Scopes**: add `https://www.googleapis.com/auth/drive.file`. It is a non-sensitive scope:
-     the app can only see files it created, nothing else in your Drive.
-   - **Audience → Test users**: add the Google accounts you will use while the app is in *Testing*.
-4. **APIs & Services → Credentials → Create credentials → OAuth client ID**:
-   - Application type **Web application**.
-   - **Authorized JavaScript origins**: `http://localhost:5173`, `http://localhost:4173` and your production
-     origin, e.g. `https://finance.example.com` (scheme + host only, no path, no trailing slash).
-   - Redirect URIs are not needed (popup token flow).
-5. Put the client id into `.env.local` and restart Vite:
+```bash
+VITE_GOOGLE_CLIENT_ID=1234567890-abc123.apps.googleusercontent.com
+```
 
-   ```bash
-   VITE_GOOGLE_CLIENT_ID=1234567890-abc123.apps.googleusercontent.com
-   ```
-
-Notes:
-
-- The client id is public by design (it ends up in the JavaScript bundle). No client secret or API key is used.
-- Browser-only apps get short-lived access tokens (about 1 hour) and no refresh token. The token is kept in
-  IndexedDB on that device so reloads do not ask again; when it expires, the card shows **Reconnect** (one tap,
-  usually without re-entering anything). Local changes keep being saved and are uploaded after reconnecting.
-- The sign-in popup is opened synchronously from the button click and Google's scripts are preloaded when Settings
-  opens, which keeps Safari on iOS from blocking it.
-- While your OAuth app is in *Testing*, Google limits it to the test users you listed. Publish it to lift that limit;
-  because `drive.file` is a non-sensitive scope, publishing normally needs no security review.
+Step-by-step instructions: [docs/SETUP.md → Google Drive](docs/SETUP.md#3-google-drive-google-cloud-setup). The
+short version is also in `.env.example`.
 
 ## Browser support
 
@@ -204,22 +190,11 @@ Google Drive.
 
 ## Deployment
 
-Any static host works. HTTPS is required for the service worker, the File System Access API and Google sign-in
-(`localhost` is exempt).
-
-```bash
-npm run build     # outputs dist/
-```
-
-- **Netlify / Vercel / Cloudflare Pages / Firebase Hosting**: publish `dist/`. No rewrite rules are needed: routing is
-  hash-based (`/#/transactions`).
-- **GitHub Pages (project site)**: build with the repository name as base path, then publish `dist/`:
-
-  ```bash
-  VITE_BASE_PATH=/<repository-name>/ npm run build
-  ```
-
-- Add the production origin to the OAuth client's *Authorized JavaScript origins*.
+`npm run build` produces a static site in `dist/` that runs on any HTTPS host without rewrite rules (routing is
+hash-based). For a sub-path such as GitHub Pages project sites, build with `VITE_BASE_PATH=/<repository-name>/`.
+Serve `sw.js` and `index.html` with `Cache-Control: no-cache` so users receive updates.
+Host-specific instructions, a GitHub Actions workflow and a post-deploy checklist:
+[docs/SETUP.md → Deployment](docs/SETUP.md#5-production-build-and-deployment).
 
 ### Installing the app
 
@@ -264,6 +239,8 @@ src/
   file creation, in-place updates, finding another device's vault, recovering from deleted or trashed files and folders,
   and expired sessions.
 - `lib/money.test.ts`: amount parsing (`12,50`, `1.234,56`, `1,234.56`…) and float-safe sums.
+
+UI and browser integration are covered by the manual [pre-release QA checklist](docs/MAINTENANCE.md#pre-release-qa-checklist).
 
 ## Design notes
 
